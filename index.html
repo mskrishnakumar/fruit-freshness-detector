@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fruit Freshness Detector 🍎</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            text-align: center;
+        }
+        input, button {
+            margin-top: 20px;
+            padding: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fruit Freshness Detector 🍎🍌🍊</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <button onclick="predictImage()">Check Freshness</button>
+
+    <div id="result"></div>
+    <img id="uploadedImage" style="display:none;"/>
+
+    <script>
+        async function predictImage() {
+            const predictionKey = 'oUgGgIrgMTizp3OEbzXzrN3FtC2X6Yc1sVjS9qUvKKCMTUsa4QqlJQQJ99BDACGhslBXJ3w3AAAIACOGGg0y'; // Replace with your key
+            const predictionEndpoint = 'https://fruitvisionprediction-prediction.cognitiveservices.azure.com/customvision/v3.0/Prediction/399d942e-40cb-4058-9836-3b021b28ab51/classify/iterations/Iteration1/url'; // Replace with your endpoint
+
+            const imageInput = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+            const uploadedImage = document.getElementById('uploadedImage');
+
+            if (!imageInput.files.length) {
+                resultDiv.innerText = 'Please upload an image!';
+                return;
+            }
+
+            const file = imageInput.files[0];
+
+            // Show uploaded image
+            uploadedImage.src = URL.createObjectURL(file);
+            uploadedImage.style.display = 'block';
+
+            const response = await fetch(predictionEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Prediction-Key': predictionKey,
+                    'Content-Type': 'application/octet-stream'
+                },
+                body: file
+            });
+
+            const data = await response.json();
+            console.log(data);
+
+            // Assume top prediction
+            const prediction = data.predictions[0];
+
+            resultDiv.innerHTML = `Prediction: <b>${prediction.tagName}</b> <br> Confidence: <b>${(prediction.probability * 100).toFixed(2)}%</b>`;
+        }
+    </script>
+</body>
+</html>
